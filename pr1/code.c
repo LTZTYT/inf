@@ -24,6 +24,14 @@ int main() {
         int current_pc = cpu_state[0];
         cpu_state[2] = memory[current_pc]; /* cpu_state[0] хрнаит номер ячейки памяти и потом мы смотрим в памяти 
                                             и там написано какую команду выполнить*/
+        if (cpu_state[2] >= 2 && cpu_state[2] <= 5){
+            if (cpu_state[0] + 1 >= 256 || memory[cpu_state[0] + 1] < 0 || memory[cpu_state[0] + 1] >= 256) { /* memory[cpu_state[0] + 1] < 0 делается для проверки, чтобы не было memory[-1], а такого быть не может*/
+                        if (cpu_state[5] != 0) { cpu_state[4] = 1; break; }
+                        cpu_state[5] = 1;
+                        cpu_state[0] = cpu_state[3];
+                    continue;
+            }
+        }                          
         switch (cpu_state[2]){
             case 0:
             cpu_state[4]=1;
@@ -34,42 +42,22 @@ int main() {
             cpu_state[0]+=1; /*т.к нету действия дальнейшего*/
             break;
             case 2:
-            if (cpu_state[0] + 1 >= 256 || memory[cpu_state[0] + 1] < 0 || memory[cpu_state[0] + 1] >= 256) { /* memory[cpu_state[0] + 1] < 0 делается для проверки, чтобы не было memory[-1], а такого быть не может*/
-                    if (cpu_state[5] != 0) { cpu_state[4] = 1; break; }
-                    cpu_state[5] = 1;
-                    cpu_state[0] = cpu_state[3];
-                continue;
-            }
+            
             cpu_state[1]=memory[memory[cpu_state[0]+1]]; /* Берем два раза memory из-за того сначала узнаем
                                                              где хранятся данные, а потом идем за данными*/
             cpu_state[0]+=2; /*т.к в если сделать +1 там будет лежать адрес, а программа воспримет его за новую команду*/
             break;
             case 3:
-            if (cpu_state[0] + 1 >= 256 || memory[cpu_state[0] + 1] < 0 || memory[cpu_state[0] + 1] >= 256) { 
-                    if (cpu_state[5] != 0) { cpu_state[4] = 1; break; }
-                    cpu_state[5] = 1;
-                    cpu_state[0] = cpu_state[3];
-                    continue;
-                }
+            
             cpu_state[1]*=memory[memory[cpu_state[0]+1]];
             cpu_state[0]+=2;
             break;
             case 4:
-            if (cpu_state[0] + 1 >= 256 || memory[cpu_state[0] + 1] < 0 || memory[cpu_state[0] + 1] >= 256) { 
-                    if (cpu_state[5] != 0) { cpu_state[4] = 1; break; }
-                    cpu_state[5] = 1;
-                    cpu_state[0] = cpu_state[3];
-                    continue;
-                }
+            
             cpu_state[0]=memory[cpu_state[0]+1]; /*один раз мемори т.к мы прыгаем именно по адерсу, раньше мы брали оттуда число*/
             break;
             case 5:
-            if (cpu_state[0] + 1 >= 256 || memory[cpu_state[0] + 1] < 0 || memory[cpu_state[0] + 1] >= 256) { 
-                    if (cpu_state[5] != 0) { cpu_state[4] = 1; break; }
-                    cpu_state[5] = 1;
-                    cpu_state[0] = cpu_state[3];
-                    continue;
-                }
+            
             if(cpu_state[1]==0){
                 cpu_state[0]=memory[cpu_state[0]+1];
                 break;
