@@ -6,19 +6,14 @@
 Программное управление зависит от того, какую инструкцию подали
 */
 int main() {
-    int ch,i=0;
+    int i=0;
     int memory[256]= {0},cpu_state[8]={0};
-    FILE *file=fopen("program.txt", "r");
-    if (file == NULL) {
-        printf("Ошибка открытия файла\n");
-        return 1;
-    }
-    while(i<256 && fscanf(file, "%d", &memory[i]) == 1) {
+    
+    while(i<256 && scanf("%d", &memory[i]) == 1) {
         i++;
     }
-    fclose(file);
     cpu_state[3] = memory[0];
-
+    cpu_state[0] = 2;
     
     while(cpu_state[4]==0){
         if(cpu_state[0] < 0 || cpu_state[0] >= 256) {
@@ -32,24 +27,49 @@ int main() {
         switch (cpu_state[2]){
             case 0:
             cpu_state[4]=1;
+            cpu_state[0]+=1;
             break;
             case 1:
             printf("%d\n",cpu_state[1]);
             cpu_state[0]+=1; /*т.к нету действия дальнейшего*/
             break;
             case 2:
+            if (cpu_state[0] + 1 >= 256 || memory[cpu_state[0] + 1] < 0 || memory[cpu_state[0] + 1] >= 256) { /* memory[cpu_state[0] + 1] < 0 делается для проверки, чтобы не было memory[-1], а такого быть не может*/
+                    if (cpu_state[5] != 0) { cpu_state[4] = 1; break; }
+                    cpu_state[5] = 1;
+                    cpu_state[0] = cpu_state[3];
+                continue;
+            }
             cpu_state[1]=memory[memory[cpu_state[0]+1]]; /* Берем два раза memory из-за того сначала узнаем
                                                              где хранятся данные, а потом идем за данными*/
             cpu_state[0]+=2; /*т.к в если сделать +1 там будет лежать адрес, а программа воспримет его за новую команду*/
             break;
             case 3:
+            if (cpu_state[0] + 1 >= 256 || memory[cpu_state[0] + 1] < 0 || memory[cpu_state[0] + 1] >= 256) { 
+                    if (cpu_state[5] != 0) { cpu_state[4] = 1; break; }
+                    cpu_state[5] = 1;
+                    cpu_state[0] = cpu_state[3];
+                    continue;
+                }
             cpu_state[1]*=memory[memory[cpu_state[0]+1]];
             cpu_state[0]+=2;
             break;
             case 4:
+            if (cpu_state[0] + 1 >= 256 || memory[cpu_state[0] + 1] < 0 || memory[cpu_state[0] + 1] >= 256) { 
+                    if (cpu_state[5] != 0) { cpu_state[4] = 1; break; }
+                    cpu_state[5] = 1;
+                    cpu_state[0] = cpu_state[3];
+                    continue;
+                }
             cpu_state[0]=memory[cpu_state[0]+1]; /*один раз мемори т.к мы прыгаем именно по адерсу, раньше мы брали оттуда число*/
             break;
             case 5:
+            if (cpu_state[0] + 1 >= 256 || memory[cpu_state[0] + 1] < 0 || memory[cpu_state[0] + 1] >= 256) { 
+                    if (cpu_state[5] != 0) { cpu_state[4] = 1; break; }
+                    cpu_state[5] = 1;
+                    cpu_state[0] = cpu_state[3];
+                    continue;
+                }
             if(cpu_state[1]==0){
                 cpu_state[0]=memory[cpu_state[0]+1];
                 break;
@@ -58,19 +78,20 @@ int main() {
                 break;
             }
             default:
-            cpu_state[4]=1;
-            break;
+            if (cpu_state[5] != 0) {
+                    cpu_state[4] = 1;
+                    break;
+                }
+                cpu_state[5] = 2;
+                cpu_state[0] = cpu_state[3];
+                continue;
         }
-        if(cpu_state[0]!=0){
-            int operand=0;
-            if(cpu_state[2]>=2 && cpu_state[2]<=5)/*проверили что там требуется адрес*/{
-                operand = memory[current_pc + 1];
-            }
-            else{
-                operand=0;
-            }
-            printf("pc=%d команда %d операнд %d аккумулятор %d\n", current_pc, cpu_state[2], operand, cpu_state[1]);
+        int operand = 0;
+        if (cpu_state[2] >= 2 && cpu_state[2] <= 5 && current_pc + 1 < 256) /*проверили что там требуется адрес*/ {
+            operand = memory[current_pc + 1];
         }
+        printf("pc=%d команда %d операнд %d аккумулятор %d\n", current_pc, cpu_state[2], operand, cpu_state[1]);
+        
     }
     return 0;
 }
