@@ -18,6 +18,11 @@ int main() {
     while(cpu_state[4]==0){
         if(cpu_state[0] < 0 || cpu_state[0] >= 256) {
             printf("Ошибка выход за границы памяти (pc = %d).\n", cpu_state[0]);
+            if(cpu_state[5]!=0){
+                cpu_state[4]=1;
+                break;
+            }
+            cpu_state[5]=3;
             cpu_state[0] = cpu_state[3]; 
             continue;
         }
@@ -34,8 +39,7 @@ int main() {
         }                          
         switch (cpu_state[2]){
             case 0:
-            cpu_state[4]=1;
-            cpu_state[0]+=1;
+            cpu_state[4]=1; 
             break;
             case 1:
             printf("%d\n",cpu_state[1]);
@@ -79,6 +83,7 @@ int main() {
             operand = memory[current_pc + 1];
         }
         printf("pc=%d команда %d операнд %d аккумулятор %d\n", current_pc, cpu_state[2], operand, cpu_state[1]);
+        
         
     }
     return 0;
